@@ -1,0 +1,128 @@
+{
+  "brand_identity": {
+    "name": "Wigzo Tape",
+    "logo_url": "https://customer-assets.emergentagent.com/job_b4f0fc4c-96da-4399-b28f-8218e03f515b/artifacts/wouuvr44_IMG-20260212-WA0090.jpg",
+    "primary_color": "#17847c",
+    "secondary_color": "#000000",
+    "accent_color": "#F0FDFD",
+    "background_color": "#FFFFFF",
+    "emotional_tone": "Professional, Secure, Invisible, Bold",
+    "visual_style": "Bold Modern Minimalist"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Oswald, sans-serif",
+      "weight": "700",
+      "style": "uppercase",
+      "letter_spacing": "tracking-tight"
+    },
+    "body": {
+      "font_family": "Manrope, sans-serif",
+      "weight": "400",
+      "line_height": "leading-relaxed"
+    },
+    "font_urls": [
+      "https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap"
+    ]
+  },
+  "colors": {
+    "palette": {
+      "primary": "#17847c",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#000000",
+      "secondary_foreground": "#FFFFFF",
+      "accent": "#F0FDFD",
+      "accent_foreground": "#17847c",
+      "background": "#FFFFFF",
+      "foreground": "#0F172A",
+      "muted": "#F1F5F9",
+      "muted_foreground": "#64748B",
+      "border": "#E2E8F0"
+    },
+    "gradients": {
+      "hero_overlay": "linear-gradient(to right, rgba(0,0,0,0.8), rgba(23,132,124,0.2))"
+    }
+  },
+  "layout": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing": {
+      "section_padding": "py-16 md:py-24",
+      "element_gap": "gap-8"
+    },
+    "grid_system": {
+      "product_grid": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8",
+      "feature_grid": "grid grid-cols-1 md:grid-cols-3 gap-12"
+    },
+    "border_radius": "rounded-none"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#17847c] text-white hover:bg-black rounded-none uppercase tracking-wider font-bold px-8 py-3 transition-all duration-300",
+      "secondary": "bg-transparent border-2 border-black text-black hover:bg-black hover:text-white rounded-none uppercase tracking-wider font-bold px-8 py-3 transition-all duration-300",
+      "outline": "border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-none"
+    },
+    "cards": {
+      "product": "group relative border border-gray-200 bg-white hover:shadow-xl transition-shadow duration-300 rounded-none overflow-hidden",
+      "feature": "p-8 border border-gray-100 bg-gray-50 hover:border-[#17847c] transition-colors duration-300 rounded-none"
+    },
+    "inputs": {
+      "default": "rounded-none border-gray-300 focus:border-[#17847c] focus:ring-[#17847c]"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": "shadow-lg",
+    "textures": "grain-overlay",
+    "icons": "lucide-react"
+  },
+  "images": {
+    "hero": [
+      {
+        "url": "https://images.unsplash.com/photo-1740198321840-398cec9cb256?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwzfHxiZWF1dGlmdWwlMjB3b21hbiUyMGxvbmclMjBoYWlyJTIwc2Fsb24lMjBjbG9zZSUyMHVwfGVufDB8fHx8MTc3MzExNDU2OHww&ixlib=rb-4.1.0&q=85",
+        "alt": "Woman with beautiful hair styling",
+        "category": "hero_main"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1612041712051-ed5c64a4646f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwyfHxiZWF1dGlmdWwlMjB3b21hbiUyMGxvbmclMjBoYWlyJTIwc2Fsb24lMjBjbG9zZSUyMHVwfGVufDB8fHx8MTc3MzExNDU2OHww&ixlib=rb-4.1.0&q=85",
+        "alt": "Professional hair styling session",
+        "category": "hero_secondary"
+      }
+    ],
+    "products": [
+      {
+        "url": "https://images.unsplash.com/photo-1522839206838-1cfecf32cc72?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwyfHxkb3VibGUlMjBzaWRlZCUyMHRhcGUlMjByb2xsJTIwd2hpdGUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3MzExNDU2N3ww&ixlib=rb-4.1.0&q=85",
+        "alt": "Wig Tape Roll - Strong Hold",
+        "category": "product_placeholder_1"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1612538498488-226257115cc4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHw0fHxkb3VibGUlMjBzaWRlZCUyMHRhcGUlMjByb2xsJTIwd2hpdGUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3MzExNDU2N3ww&ixlib=rb-4.1.0&q=85",
+        "alt": "Wig Tape Roll - Sensitive Skin",
+        "category": "product_placeholder_2"
+      }
+    ],
+    "about": [
+      {
+        "url": "https://images.unsplash.com/photo-1629397683830-9805395892e8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwxfHxoYWlyJTIwc3R5bGlzdCUyMGFwcGx5aW5nJTIwd2lnfGVufDB8fHx8MTc3MzExNDU1NHww&ixlib=rb-4.1.0&q=85",
+        "alt": "Stylist applying wig",
+        "category": "about_us"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install Oswald and Manrope fonts via Google Fonts in index.html or CSS.",
+    "Configure Tailwind theme colors to match the brand identity exactly.",
+    "Use 'rounded-none' for a sharp, industrial, precision look for all buttons and cards.",
+    "Implement the 'Split Hero' layout: Image on right (50%), Bold Text on left (50%) with Teal CTA.",
+    "Use Shadcn components but OVERRIDE the default rounded-md to rounded-none.",
+    "Ensure the 'Wigzo Tape' logo is prominent in the header.",
+    "For the Admin Panel, keep it clean and functional with a sidebar layout.",
+    "Integrate Razorpay dummy flow for checkout if actual keys are not provided.",
+    "Use the provided image URLs as placeholders where real product images are missing.",
+    "Add 'data-testid' to all interactive elements."
+  ],
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds, stick to solid white or very light teal.",
+    "Ensure high contrast for text (Black on White, White on Teal).",
+    "Micro-interactions on buttons: Scale up slightly (1.05) on hover.",
+    "Use skeleton loaders for product fetching states."
+  ]
+}

@@ -374,17 +374,103 @@ async def get_order(order_id: str, user: User = Depends(get_current_user)):
 
 # ============ ADMIN ROUTES ============
 
+@api_router.get("/admin/users")
+async def get_all_users(admin: User = Depends(get_admin_user)):
+    """Get all users with encrypted passwords (admin only)"""
+    users = await db.users.find({}, {"_id": 0}).to_list(1000)
+    # Return users with password shown as encrypted
+    for user in users:
+        if 'password' in user:
+            user['password'] = '••••••••' + user['password'][-8:]  # Show last 8 chars of hash
+    return users
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: User = Depends(get_admin_user)):
+    """Delete a user (admin only)"""
+    # Prevent admin from deleting themselves
+    if user_id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own admin account")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Also delete user's cart and orders
+    await db.carts.delete_many({"user_id": user_id})
+    
+    return {"message": "User deleted successfully"}
+
 @api_router.get("/admin/orders", response_model=List[Order])
 async def get_all_orders(admin: User = Depends(get_admin_user)):
+    """Get all orders from all users (admin only)"""
     orders = await db.orders.find({}, {"_id": 0}).to_list(1000)
     return orders
 
+@api_router.get("/admin/orders/{order_id}", response_model=Order)
+async def get_order_detail(order_id: str, admin: User = Depends(get_admin_user)):
+    """Get detailed order information (admin only)"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: dict, admin: User = Depends(get_admin_user)):
+    """Update order status (admin only)"""
+    valid_statuses = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"]
+    if status.get('status') not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+    
     result = await db.orders.update_one({"id": order_id}, {"$set": {"status": status['status']}})
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Order not found")
     return {"message": "Order status updated"}
+
+@api_router.put("/admin/orders/{order_id}")
+async def update_order(order_id: str, order_update: dict, admin: User = Depends(get_admin_user)):
+    """Update order details (admin only)"""
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Allow updating shipping address and status
+    update_data = {}
+    if 'shipping_address' in order_update:
+        update_data['shipping_address'] = order_update['shipping_address']
+    if 'status' in order_update:
+        update_data['status'] = order_update['status']
+    if 'items' in order_update:
+        update_data['items'] = order_update['items']
+    if 'total_amount' in order_update:
+        update_data['total_amount'] = order_update['total_amount']
+    
+    if update_data:
+        await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    
+    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    return updated_order
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(admin: User = Depends(get_admin_user)):
+    """Get dashboard statistics (admin only)"""
+    total_users = await db.users.count_documents({})
+    total_orders = await db.orders.count_documents({})
+    total_products = await db.products.count_documents({})
+    
+    # Calculate total revenue
+    orders = await db.orders.find({"status": {"$in": ["paid", "processing", "shipped", "delivered"]}}).to_list(1000)
+    total_revenue = sum(order.get('total_amount', 0) for order in orders)
+    
+    # Recent orders
+    recent_orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).limit(5).to_list(5)
+    
+    return {
+        "total_users": total_users,
+        "total_orders": total_orders,
+        "total_products": total_products,
+        "total_revenue": total_revenue,
+        "recent_orders": recent_orders
+    }
 
 # Include router
 app.include_router(api_router)

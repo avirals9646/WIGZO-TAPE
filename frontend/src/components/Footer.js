@@ -11,7 +11,7 @@ export default function Footer() {
             <img 
               src="https://customer-assets.emergentagent.com/job_b4f0fc4c-96da-4399-b28f-8218e03f515b/artifacts/wouuvr44_IMG-20260212-WA0090.jpg" 
               alt="Wigzo Tape" 
-              className="h-12 w-auto mb-4 brightness-0 invert"
+              className="h-16 w-auto mb-4"
             />
             <p className="text-sm text-gray-400">
               Premium wig tape solutions for professionals and enthusiasts.

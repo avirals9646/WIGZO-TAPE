@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import ProductCard from '../components/ProductCard';
+import HomeCarousel from '../components/HomeCarousel';
 import api from '../api';
 import { ArrowRight, Shield, Zap, Award } from 'lucide-react';
 
@@ -23,34 +24,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen" data-testid="home-page">
-      {/* Hero Section */}
-      <section className="relative h-[600px] overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1740198321840-398cec9cb256?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwzfHxiZWF1dGlmdWwlMjB3b21hbiUyMGxvbmclMjBoYWlyJTIwc2Fsb24lMjBjbG9zZSUyMHVwfGVufDB8fHx8MTc3MzExNDU2OHww&ixlib=rb-4.1.0&q=85"
-            alt="Hero"
-            className="w-full h-full object-cover"
-          />
-          <div className="hero-overlay absolute inset-0"></div>
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-          <div className="max-w-2xl">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6" data-testid="hero-title">
-              INVISIBLE HOLD.
-              <br />
-              VISIBLE CONFIDENCE.
-            </h1>
-            <p className="text-xl text-gray-200 mb-8">
-              Premium wig tape designed for professionals. Strong, reliable, and invisible.
-            </p>
-            <Link to="/products">
-              <Button className="btn-primary text-lg" data-testid="shop-now-button">
-                Shop Now <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Carousel Hero Section */}
+      <HomeCarousel />
 
       {/* Features Section */}
       <section className="py-16 md:py-24 bg-gray-50">

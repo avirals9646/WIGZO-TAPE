@@ -66,10 +66,11 @@ export default function Admin() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="coupons">Coupons</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -82,6 +83,10 @@ export default function Admin() {
 
           <TabsContent value="users">
             <UsersTab />
+          </TabsContent>
+
+          <TabsContent value="coupons">
+            <CouponsTab />
           </TabsContent>
         </Tabs>
       </div>
@@ -613,3 +618,295 @@ function UsersTab() {
     </div>
   );
 }
+
+
+// Coupons Tab Component
+function CouponsTab() {
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    code: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    min_purchase: '0',
+    max_discount: '',
+    usage_limit: '',
+    valid_from: new Date().toISOString().split('T')[0],
+    valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    is_active: true
+  });
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/admin/coupons');
+      setCoupons(response.data);
+    } catch (error) {
+      console.error('Failed to fetch coupons:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateCode = async () => {
+    try {
+      const response = await api.post('/admin/coupons/generate');
+      setFormData({ ...formData, code: response.data.code });
+      toast.success('Coupon code generated!');
+    } catch (error) {
+      toast.error('Failed to generate code');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/admin/coupons', formData);
+      toast.success('Coupon created successfully!');
+      setShowForm(false);
+      resetForm();
+      fetchCoupons();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to create coupon');
+    }
+  };
+
+  const handleDelete = async (couponId) => {
+    if (!window.confirm('Are you sure you want to delete this coupon?')) return;
+
+    try {
+      await api.delete(`/admin/coupons/${couponId}`);
+      toast.success('Coupon deleted successfully!');
+      fetchCoupons();
+    } catch (error) {
+      toast.error('Failed to delete coupon');
+    }
+  };
+
+  const handleToggleActive = async (couponId, currentStatus) => {
+    try {
+      await api.put(`/admin/coupons/${couponId}`, { is_active: !currentStatus });
+      toast.success('Coupon status updated!');
+      fetchCoupons();
+    } catch (error) {
+      toast.error('Failed to update coupon');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      code: '',
+      discount_type: 'percentage',
+      discount_value: '',
+      min_purchase: '0',
+      max_discount: '',
+      usage_limit: '',
+      valid_from: new Date().toISOString().split('T')[0],
+      valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      is_active: true
+    });
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading coupons...</div>;
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Coupon Management ({coupons.length})</h2>
+        <Button
+          onClick={() => setShowForm(!showForm)}
+          className="btn-primary"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          {showForm ? 'Cancel' : 'Create Coupon'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="mb-8 border border-gray-200 p-6 rounded-none bg-white">
+          <h3 className="text-xl font-bold mb-4">CREATE NEW COUPON</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="code">Coupon Code *</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    id="code"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                    required
+                    className="rounded-none"
+                    placeholder="SUMMER2024"
+                  />
+                  <Button type="button" onClick={handleGenerateCode} className="btn-secondary">
+                    Generate
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="discount_type">Discount Type *</Label>
+                <Select
+                  value={formData.discount_type}
+                  onValueChange={(value) => setFormData({ ...formData, discount_type: value })}
+                >
+                  <SelectTrigger className="mt-1 rounded-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                    <SelectItem value="fixed">Fixed Amount (\u20b9)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="discount_value">Discount Value *</Label>
+                <Input
+                  id="discount_value"
+                  type="number"
+                  step="0.01"
+                  value={formData.discount_value}
+                  onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
+                  required
+                  className="mt-1 rounded-none"
+                  placeholder={formData.discount_type === 'percentage' ? '10' : '100'}
+                />
+              </div>
+              <div>
+                <Label htmlFor="min_purchase">Minimum Purchase (\u20b9)</Label>
+                <Input
+                  id="min_purchase"
+                  type="number"
+                  step="0.01"
+                  value={formData.min_purchase}
+                  onChange={(e) => setFormData({ ...formData, min_purchase: e.target.value })}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              {formData.discount_type === 'percentage' && (
+                <div>
+                  <Label htmlFor="max_discount">Max Discount (\u20b9)</Label>
+                  <Input
+                    id="max_discount"
+                    type="number"
+                    step="0.01"
+                    value={formData.max_discount}
+                    onChange={(e) => setFormData({ ...formData, max_discount: e.target.value })}
+                    className="mt-1 rounded-none"
+                    placeholder="Optional"
+                  />
+                </div>
+              )}
+              <div>
+                <Label htmlFor="usage_limit">Usage Limit</Label>
+                <Input
+                  id="usage_limit"
+                  type="number"
+                  value={formData.usage_limit}
+                  onChange={(e) => setFormData({ ...formData, usage_limit: e.target.value })}
+                  className="mt-1 rounded-none"
+                  placeholder="Leave empty for unlimited"
+                />
+              </div>
+              <div>
+                <Label htmlFor="valid_from">Valid From *</Label>
+                <Input
+                  id="valid_from"
+                  type="date"
+                  value={formData.valid_from}
+                  onChange={(e) => setFormData({ ...formData, valid_from: e.target.value })}
+                  required
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="valid_until">Valid Until *</Label>
+                <Input
+                  id="valid_until"
+                  type="date"
+                  value={formData.valid_until}
+                  onChange={(e) => setFormData({ ...formData, valid_until: e.target.value })}
+                  required
+                  className="mt-1 rounded-none"
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="btn-primary">
+              Create Coupon
+            </Button>
+          </form>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {coupons.length === 0 ? (
+          <div className="text-center py-12 border border-gray-200 rounded-none">
+            <p className="text-lg text-gray-500">No coupons yet. Create your first coupon!</p>
+          </div>
+        ) : (
+          coupons.map((coupon) => (
+            <div
+              key={coupon.id}
+              className="border border-gray-200 p-6 rounded-none bg-white"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl font-bold text-[#17847c]">{coupon.code}</span>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${coupon.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                      {coupon.is_active ? 'ACTIVE' : 'INACTIVE'}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p>
+                      <strong>Discount:</strong>{' '}
+                      {coupon.discount_type === 'percentage'
+                        ? `${coupon.discount_value}%`
+                        : `\u20b9${coupon.discount_value}`}
+                      {coupon.max_discount && ` (Max: \u20b9${coupon.max_discount})`}
+                    </p>
+                    {coupon.min_purchase > 0 && (
+                      <p><strong>Min Purchase:</strong> \u20b9{coupon.min_purchase}</p>
+                    )}
+                    <p>
+                      <strong>Valid:</strong>{' '}
+                      {new Date(coupon.valid_from).toLocaleDateString()} -{' '}
+                      {new Date(coupon.valid_until).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <strong>Usage:</strong> {coupon.used_count}{' '}
+                      {coupon.usage_limit ? `/ ${coupon.usage_limit}` : '(Unlimited)'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => handleToggleActive(coupon.id, coupon.is_active)}
+                    className={`${coupon.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-none text-xs px-4 py-2`}
+                  >
+                    {coupon.is_active ? 'Deactivate' : 'Activate'}
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(coupon.id)}
+                    className="bg-red-600 text-white hover:bg-red-700 rounded-none text-xs px-4 py-2"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+

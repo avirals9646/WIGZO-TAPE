@@ -98,6 +98,9 @@ class Order(BaseModel):
     id: str
     user_id: str
     items: List[dict]
+    subtotal: Optional[float] = None
+    discount: float = 0
+    coupon_code: Optional[str] = None
     total_amount: float
     status: str  # pending, paid, shipped, delivered, cancelled
     payment_id: Optional[str] = None
@@ -108,6 +111,36 @@ class OrderCreate(BaseModel):
     items: List[dict]
     total_amount: float
     shipping_address: dict
+    coupon_code: Optional[str] = None
+
+class Coupon(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    code: str
+    discount_type: str  # percentage or fixed
+    discount_value: float
+    min_purchase: float = 0
+    max_discount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    used_count: int = 0
+    valid_from: str
+    valid_until: str
+    is_active: bool = True
+    created_at: str
+
+class CouponCreate(BaseModel):
+    code: str
+    discount_type: str
+    discount_value: float
+    min_purchase: float = 0
+    max_discount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    valid_from: str
+    valid_until: str
+
+class CouponValidate(BaseModel):
+    code: str
+    order_amount: float
 
 # ============ AUTH HELPERS ============
 
@@ -326,12 +359,38 @@ async def clear_cart(user: User = Depends(get_current_user)):
 
 @api_router.post("/orders/create", response_model=Order)
 async def create_order(order_data: OrderCreate, user: User = Depends(get_current_user)):
+    discount = 0
+    coupon_code = None
+    
+    # Apply coupon if provided
+    if order_data.coupon_code:
+        try:
+            validate_result = await validate_coupon({
+                'code': order_data.coupon_code, 
+                'order_amount': order_data.total_amount
+            })
+            discount = validate_result['discount']
+            coupon_code = order_data.coupon_code.upper()
+            
+            # Increment coupon usage
+            await db.coupons.update_one(
+                {"code": coupon_code},
+                {"$inc": {"used_count": 1}}
+            )
+        except HTTPException:
+            raise
+    
+    final_amount = order_data.total_amount - discount
+    
     order_id = str(uuid.uuid4())
     order_doc = {
         "id": order_id,
         "user_id": user.id,
         "items": order_data.items,
-        "total_amount": order_data.total_amount,
+        "subtotal": order_data.total_amount,
+        "discount": discount,
+        "coupon_code": coupon_code,
+        "total_amount": final_amount,
         "status": "pending",
         "payment_id": None,
         "shipping_address": order_data.shipping_address,
@@ -364,6 +423,72 @@ async def process_payment(order_id: str, payment_data: dict, user: User = Depend
 async def get_orders(user: User = Depends(get_current_user)):
     orders = await db.orders.find({"user_id": user.id}, {"_id": 0}).to_list(1000)
     return orders
+
+
+# ============ COUPON ROUTES ============
+
+@api_router.post("/coupons/validate")
+async def validate_coupon(coupon_data: dict):
+    """Validate a coupon code"""
+    coupon = await db.coupons.find_one({"code": coupon_data['code'].upper()}, {"_id": 0})
+    
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Invalid coupon code")
+    
+    if not coupon.get('is_active'):
+        raise HTTPException(status_code=400, detail="Coupon is no longer active")
+    
+    # Check if coupon is within valid date range
+    now = datetime.now(timezone.utc)
+    valid_from = datetime.fromisoformat(coupon['valid_from'])
+    valid_until = datetime.fromisoformat(coupon['valid_until'])
+    
+    if now < valid_from or now > valid_until:
+        raise HTTPException(status_code=400, detail="Coupon has expired or not yet valid")
+    
+    # Check usage limit
+    if coupon.get('usage_limit') and coupon.get('used_count', 0) >= coupon['usage_limit']:
+        raise HTTPException(status_code=400, detail="Coupon usage limit reached")
+    
+    # Check minimum purchase
+    if coupon_data['order_amount'] < coupon.get('min_purchase', 0):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Minimum purchase of ₹{coupon['min_purchase']} required"
+        )
+    
+    # Calculate discount
+    if coupon['discount_type'] == 'percentage':
+        discount = (coupon_data['order_amount'] * coupon['discount_value']) / 100
+        if coupon.get('max_discount'):
+            discount = min(discount, coupon['max_discount'])
+    else:  # fixed
+        discount = coupon['discount_value']
+    
+    discount = min(discount, coupon_data['order_amount'])  # Can't discount more than total
+    
+    return {
+        "valid": True,
+        "discount": discount,
+        "final_amount": coupon_data['order_amount'] - discount,
+        "coupon_details": {
+            "code": coupon['code'],
+            "discount_type": coupon['discount_type'],
+            "discount_value": coupon['discount_value']
+        }
+    }
+
+@api_router.get("/coupons/public")
+async def get_public_coupons():
+    """Get all active public coupons"""
+    now = datetime.now(timezone.utc).isoformat()
+    coupons = await db.coupons.find({
+        "is_active": True,
+        "valid_from": {"$lte": now},
+        "valid_until": {"$gte": now}
+    }, {"_id": 0}).to_list(100)
+    return coupons
+
 
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str, user: User = Depends(get_current_user)):
@@ -422,6 +547,78 @@ async def update_order_status(order_id: str, status: dict, admin: User = Depends
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
     
     result = await db.orders.update_one({"id": order_id}, {"$set": {"status": status['status']}})
+
+@api_router.get("/admin/coupons")
+async def get_all_coupons(admin: User = Depends(get_admin_user)):
+    """Get all coupons (admin only)"""
+    coupons = await db.coupons.find({}, {"_id": 0}).to_list(1000)
+    return coupons
+
+@api_router.post("/admin/coupons")
+async def create_coupon(coupon_data: dict, admin: User = Depends(get_admin_user)):
+    """Create a new coupon (admin only)"""
+    # Check if code already exists
+    existing = await db.coupons.find_one({"code": coupon_data['code'].upper()})
+    if existing:
+        raise HTTPException(status_code=400, detail="Coupon code already exists")
+    
+    coupon_id = str(uuid.uuid4())
+    coupon_doc = {
+        "id": coupon_id,
+        "code": coupon_data['code'].upper(),
+        "discount_type": coupon_data['discount_type'],
+        "discount_value": float(coupon_data['discount_value']),
+        "min_purchase": float(coupon_data.get('min_purchase', 0)),
+        "max_discount": float(coupon_data['max_discount']) if coupon_data.get('max_discount') else None,
+        "usage_limit": int(coupon_data['usage_limit']) if coupon_data.get('usage_limit') else None,
+        "used_count": 0,
+        "valid_from": coupon_data['valid_from'],
+        "valid_until": coupon_data['valid_until'],
+        "is_active": coupon_data.get('is_active', True),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.coupons.insert_one(coupon_doc)
+    return coupon_doc
+
+@api_router.put("/admin/coupons/{coupon_id}")
+async def update_coupon(coupon_id: str, coupon_data: dict, admin: User = Depends(get_admin_user)):
+    """Update a coupon (admin only)"""
+    update_data = {}
+    if 'is_active' in coupon_data:
+        update_data['is_active'] = coupon_data['is_active']
+    if 'usage_limit' in coupon_data:
+        update_data['usage_limit'] = int(coupon_data['usage_limit']) if coupon_data['usage_limit'] else None
+    if 'valid_until' in coupon_data:
+        update_data['valid_until'] = coupon_data['valid_until']
+    
+    if update_data:
+        result = await db.coupons.update_one({"id": coupon_id}, {"$set": update_data})
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Coupon not found")
+    
+    updated_coupon = await db.coupons.find_one({"id": coupon_id}, {"_id": 0})
+    return updated_coupon
+
+@api_router.delete("/admin/coupons/{coupon_id}")
+async def delete_coupon(coupon_id: str, admin: User = Depends(get_admin_user)):
+    """Delete a coupon (admin only)"""
+    result = await db.coupons.delete_one({"id": coupon_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    return {"message": "Coupon deleted successfully"}
+
+@api_router.post("/admin/coupons/generate")
+async def generate_coupon_code(admin: User = Depends(get_admin_user)):
+    """Generate a random coupon code (admin only)"""
+    import random
+    import string
+    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    # Check if it exists
+    while await db.coupons.find_one({"code": code}):
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    return {"code": code}
+
+
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Order not found")
     return {"message": "Order status updated"}

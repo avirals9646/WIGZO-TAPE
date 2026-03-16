@@ -12,6 +12,9 @@ export default function Checkout() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -59,6 +62,43 @@ export default function Checkout() {
     }, 0);
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+      const response = await api.post('/coupons/validate', {
+        code: couponCode,
+        order_amount: calculateTotal()
+      });
+      
+      setAppliedCoupon(response.data);
+      toast.success(`Coupon applied! You saved ₹${response.data.discount.toFixed(2)}`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Invalid coupon code');
+      setAppliedCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    toast.info('Coupon removed');
+  };
+
+  const getFinalTotal = () => {
+    const subtotal = calculateTotal();
+    if (appliedCoupon) {
+      return appliedCoupon.final_amount;
+    }
+    return subtotal;
+  };
+
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -81,7 +121,8 @@ export default function Checkout() {
       const orderResponse = await api.post('/orders/create', {
         items: orderItems,
         total_amount: calculateTotal(),
-        shipping_address: formData
+        shipping_address: formData,
+        coupon_code: appliedCoupon ? appliedCoupon.coupon_details.code : null
       });
 
       const orderId = orderResponse.data.id;
@@ -247,6 +288,46 @@ export default function Checkout() {
           <div className="lg:col-span-1">
             <div className="border border-gray-200 p-6 rounded-none sticky top-24">
               <h2 className="text-2xl font-bold mb-6">ORDER SUMMARY</h2>
+              
+              {/* Coupon Section */}
+              <div className="mb-6 p-4 bg-[#F0FDFD] border border-[#17847c] rounded-none">
+                <h3 className="font-bold mb-2">HAVE A COUPON?</h3>
+                {!appliedCoupon ? (
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Enter coupon code"
+                      className="rounded-none"
+                      data-testid="coupon-input"
+                    />
+                    <Button
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading}
+                      className="btn-primary"
+                      data-testid="apply-coupon-button"
+                    >
+                      {couponLoading ? 'Checking...' : 'Apply'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center bg-white p-2 rounded">
+                      <span className="font-bold text-[#17847c]">{appliedCoupon.coupon_details.code}</span>
+                      <button
+                        onClick={handleRemoveCoupon}
+                        className="text-red-600 text-sm hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      You saved ₹{appliedCoupon.discount.toFixed(2)}!
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-4 mb-6">
                 {products.map(product => {
                   const quantity = getCartItemQuantity(product.id);
@@ -257,9 +338,23 @@ export default function Checkout() {
                     </div>
                   );
                 })}
-                <div className="border-t pt-4 flex justify-between font-bold text-xl">
-                  <span>Total</span>
-                  <span className="text-[#17847c]" data-testid="checkout-total">₹{calculateTotal().toFixed(2)}</span>
+                <div className="border-t pt-4">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Subtotal</span>
+                    <span>₹{calculateTotal().toFixed(2)}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm mb-2 text-green-600">
+                      <span>Discount ({appliedCoupon.coupon_details.code})</span>
+                      <span>-₹{appliedCoupon.discount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-xl">
+                    <span>Total</span>
+                    <span className="text-[#17847c]" data-testid="checkout-total">
+                      ₹{getFinalTotal().toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <p className="text-xs text-gray-500">

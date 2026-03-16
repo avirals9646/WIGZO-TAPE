@@ -5,6 +5,8 @@ import { CartProvider } from './CartContext';
 import { Toaster } from './components/ui/sonner';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Banner from './components/Banner';
+import NewUserPopup from './components/NewUserPopup';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -41,6 +43,8 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 function AppRoutes() {
   return (
     <div className="App">
+      <Banner />
+      <NewUserPopup />
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

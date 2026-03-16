@@ -891,7 +891,34 @@ function CouponsTab() {
                       {new Date(coupon.valid_until).toLocaleDateString()}
                     </p>
                     <p>
-
+                      <strong>Usage:</strong> {coupon.used_count}{' '}
+                      {coupon.usage_limit ? `/ ${coupon.usage_limit}` : '(Unlimited)'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => handleToggleActive(coupon.id, coupon.is_active)}
+                    className={`${coupon.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-none text-xs px-4 py-2`}
+                  >
+                    {coupon.is_active ? 'Deactivate' : 'Activate'}
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(coupon.id)}
+                    className="bg-red-600 text-white hover:bg-red-700 rounded-none text-xs px-4 py-2"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
 
 // Blogs Tab Component (Admin)
 function BlogsTab() {
@@ -1127,34 +1154,4 @@ function ContactsTab() {
     </div>
   );
 }
-
-                      <strong>Usage:</strong> {coupon.used_count}{' '}
-                      {coupon.usage_limit ? `/ ${coupon.usage_limit}` : '(Unlimited)'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    onClick={() => handleToggleActive(coupon.id, coupon.is_active)}
-                    className={`${coupon.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-none text-xs px-4 py-2`}
-                  >
-                    {coupon.is_active ? 'Deactivate' : 'Activate'}
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(coupon.id)}
-                    className="bg-red-600 text-white hover:bg-red-700 rounded-none text-xs px-4 py-2"
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
 

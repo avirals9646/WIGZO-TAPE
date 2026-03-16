@@ -66,11 +66,13 @@ export default function Admin() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-6 mb-8">
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="coupons">Coupons</TabsTrigger>
+            <TabsTrigger value="blogs">Blogs</TabsTrigger>
+            <TabsTrigger value="contacts">Contacts</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -87,6 +89,14 @@ export default function Admin() {
 
           <TabsContent value="coupons">
             <CouponsTab />
+          </TabsContent>
+
+          <TabsContent value="blogs">
+            <BlogsTab />
+          </TabsContent>
+
+          <TabsContent value="contacts">
+            <ContactsTab />
           </TabsContent>
         </Tabs>
       </div>
@@ -881,6 +891,243 @@ function CouponsTab() {
                       {new Date(coupon.valid_until).toLocaleDateString()}
                     </p>
                     <p>
+
+
+// Blogs Tab Component (Admin)
+function BlogsTab() {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/blogs');
+      setBlogs(response.data);
+    } catch (error) {
+      console.error('Failed to fetch blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (blogId) => {
+    if (!window.confirm('Are you sure you want to delete this blog?')) return;
+
+    try {
+      await api.delete(`/admin/blogs/${blogId}`);
+      toast.success('Blog deleted successfully!');
+      fetchBlogs();
+    } catch (error) {
+      toast.error('Failed to delete blog');
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading blogs...</div>;
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-6">Blog Management ({blogs.length})</h2>
+
+      {blogs.length === 0 ? (
+        <div className="text-center py-12 border border-gray-200 rounded-none">
+          <p className="text-lg text-gray-500">No blogs yet</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {blogs.map((blog) => (
+            <div
+              key={blog.id}
+              className="border border-gray-200 p-6 rounded-none bg-white"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold mb-2">{blog.title}</h3>
+                  <p className="text-gray-600 mb-3 line-clamp-2">{blog.content}</p>
+                  <div className="text-sm text-gray-500">
+                    <p><strong>Author:</strong> {blog.author_name}</p>
+                    <p><strong>Posted:</strong> {new Date(blog.created_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => handleDelete(blog.id)}
+                  className="bg-red-600 text-white hover:bg-red-700 rounded-none text-xs px-4 py-2"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Contacts Tab Component (Admin)
+function ContactsTab() {
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const fetchContacts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/admin/contact-forms');
+      setContacts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch contacts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReply = async (contactId) => {
+    if (!replyText.trim()) {
+      toast.error('Please enter a reply');
+      return;
+    }
+
+    try {
+      await api.post(`/admin/contact-forms/${contactId}/reply`, { reply: replyText });
+      toast.success('Reply sent successfully!');
+      setReplyingTo(null);
+      setReplyText('');
+      fetchContacts();
+    } catch (error) {
+      toast.error('Failed to send reply');
+    }
+  };
+
+  const handleDelete = async (contactId) => {
+    if (!window.confirm('Are you sure you want to delete this contact form?')) return;
+
+    try {
+      await api.delete(`/admin/contact-forms/${contactId}`);
+      toast.success('Contact form deleted!');
+      fetchContacts();
+    } catch (error) {
+      toast.error('Failed to delete contact form');
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading contact forms...</div>;
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-6">Contact Forms ({contacts.length})</h2>
+
+      {contacts.length === 0 ? (
+        <div className="text-center py-12 border border-gray-200 rounded-none">
+          <p className="text-lg text-gray-500">No contact forms yet</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {contacts.map((contact) => (
+            <div
+              key={contact.id}
+              className="border border-gray-200 p-6 rounded-none bg-white"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-xl font-bold">{contact.name}</h3>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${contact.status === 'replied' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {contact.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-sm text-gray-600 mb-4">
+                    <p><strong>Email:</strong> {contact.email}</p>
+                    <p><strong>Phone:</strong> {contact.phone}</p>
+                    <p><strong>Address:</strong> {contact.address}</p>
+                    <p><strong>Submitted:</strong> {new Date(contact.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded mb-4">
+                    <p className="text-sm font-bold mb-1">Message:</p>
+                    <p className="text-gray-700">{contact.feedback}</p>
+                  </div>
+
+                  {contact.admin_reply && (
+                    <div className="bg-[#F0FDFD] border border-[#17847c] p-4 rounded">
+                      <p className="text-sm font-bold mb-1">Your Reply:</p>
+                      <p className="text-gray-700">{contact.admin_reply}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Replied on: {new Date(contact.replied_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {replyingTo === contact.id ? (
+                <div className="mt-4">
+                  <Label htmlFor={`reply-${contact.id}`}>Your Reply</Label>
+                  <Textarea
+                    id={`reply-${contact.id}`}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    rows={4}
+                    className="mt-1 rounded-none"
+                    placeholder="Type your reply here..."
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      onClick={() => handleReply(contact.id)}
+                      className="btn-primary"
+                    >
+                      Send Reply
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setReplyingTo(null);
+                        setReplyText('');
+                      }}
+                      className="btn-secondary"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2 mt-4">
+                  {contact.status === 'pending' && (
+                    <Button
+                      onClick={() => setReplyingTo(contact.id)}
+                      className="bg-[#17847c] text-white hover:bg-black rounded-none text-xs px-4 py-2"
+                    >
+                      Reply
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => handleDelete(contact.id)}
+                    className="bg-red-600 text-white hover:bg-red-700 rounded-none text-xs px-4 py-2"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
                       <strong>Usage:</strong> {coupon.used_count}{' '}
                       {coupon.usage_limit ? `/ ${coupon.usage_limit}` : '(Unlimited)'}
                     </p>
@@ -909,4 +1156,5 @@ function CouponsTab() {
     </div>
   );
 }
+
 

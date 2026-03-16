@@ -16,6 +16,10 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
+import Blogs from './pages/Blogs';
+import CreateBlog from './pages/CreateBlog';
+import BlogDetail from './pages/BlogDetail';
+import Contact from './pages/Contact';
 import '@/App.css';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -50,7 +54,11 @@ function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/blogs/create" element={<CreateBlog />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/cart"

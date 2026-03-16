@@ -37,11 +37,25 @@ export default function Header() {
               Products
             </Link>
             <Link 
+              to="/blogs" 
+              className="text-sm font-bold uppercase tracking-wider hover:text-[#17847c] transition-colors"
+              data-testid="nav-blogs"
+            >
+              Blog
+            </Link>
+            <Link 
               to="/about" 
               className="text-sm font-bold uppercase tracking-wider hover:text-[#17847c] transition-colors"
               data-testid="nav-about"
             >
               About
+            </Link>
+            <Link 
+              to="/contact" 
+              className="text-sm font-bold uppercase tracking-wider hover:text-[#17847c] transition-colors"
+              data-testid="nav-contact"
+            >
+              Contact
             </Link>
           </nav>
 

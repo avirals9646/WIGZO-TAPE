@@ -142,6 +142,77 @@ class CouponValidate(BaseModel):
     code: str
     order_amount: float
 
+class Blog(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    title: str
+    content: str
+    author_id: str
+    author_name: str
+    created_at: str
+
+class BlogCreate(BaseModel):
+    title: str
+    content: str
+
+class ContactForm(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    name: str
+    email: str
+    phone: str
+    address: str
+    feedback: str
+    status: str  # pending, replied
+    admin_reply: Optional[str] = None
+    created_at: str
+    replied_at: Optional[str] = None
+
+class ContactFormCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+
+# ============ EMAIL SERVICE ============
+
+async def send_email(to_email: str, subject: str, body: str):
+    """Send email using SMTP (placeholder - configure SMTP settings)"""
+    try:
+        # For now, just log the email (configure SMTP for production)
+        print(f"\n{'='*50}")
+        print(f"EMAIL SENT TO: {to_email}")
+        print(f"SUBJECT: {subject}")
+        print(f"BODY:\n{body}")
+        print(f"{'='*50}\n")
+        
+        # TODO: Configure SMTP for production
+        # import aiosmtplib
+        # from email.message import EmailMessage
+        # msg = EmailMessage()
+        # msg['From'] = os.environ.get('SMTP_FROM', 'noreply@wigzotape.com')
+        # msg['To'] = to_email
+        # msg['Subject'] = subject
+        # msg.set_content(body)
+        # await aiosmtplib.send(
+        #     msg,
+        #     hostname=os.environ.get('SMTP_HOST', 'smtp.gmail.com'),
+        #     port=int(os.environ.get('SMTP_PORT', 587)),
+        #     username=os.environ.get('SMTP_USER'),
+        #     password=os.environ.get('SMTP_PASSWORD'),
+        #     start_tls=True
+        # )
+        return True
+    except Exception as e:
+        print(f"Email error: {str(e)}")
+        return False
+
+
+    address: str
+    feedback: str
+
+class ContactFormReply(BaseModel):
+    reply: str
+
 # ============ AUTH HELPERS ============
 
 def hash_password(password: str) -> str:
@@ -207,6 +278,23 @@ async def login(credentials: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = create_token(user['id'], user.get('is_admin', False))
+    
+    # Send welcome email
+    await send_email(
+        user['email'],
+        "Welcome Back to Wigzo Tape!",
+        f"""Hi {user['name']},
+
+Welcome back to Wigzo Tape!
+
+Thank you for logging in. We're glad to have you back!
+
+Browse our latest products and enjoy premium wig tape solutions.
+
+Best regards,
+Wigzo Tape Team"""
+    )
+    
     return {
         "token": token,
         "user": {
@@ -401,6 +489,41 @@ async def create_order(order_data: OrderCreate, user: User = Depends(get_current
     # Clear cart after order
     await db.carts.update_one({"user_id": user.id}, {"$set": {"items": []}})
     
+    # Send order confirmation email
+    items_text = "\n".join([
+        f"- {item['name']} x {item['quantity']} = ₹{item['price'] * item['quantity']}"
+        for item in order_data.items
+    ])
+    
+    await send_email(
+        order_data.shipping_address['email'],
+        f"Order Confirmation #{order_id[:8]} - Wigzo Tape",
+        f"""Hi {order_data.shipping_address['fullName']},
+
+Thank you for your order!
+
+Order ID: {order_id}
+Order Date: {datetime.now(timezone.utc).strftime('%B %d, %Y')}
+
+Items Ordered:
+{items_text}
+
+Subtotal: ₹{order_data.total_amount:.2f}
+{f'Discount ({coupon_code}): -₹{discount:.2f}' if discount > 0 else ''}
+Total: ₹{final_amount:.2f}
+
+Shipping Address:
+{order_data.shipping_address['address']}
+{order_data.shipping_address['city']}, {order_data.shipping_address['state']} - {order_data.shipping_address['pincode']}
+
+We'll send you another email when your order ships.
+
+Thank you for choosing Wigzo Tape!
+
+Best regards,
+Wigzo Tape Team"""
+    )
+    
     return Order(**order_doc)
 
 @api_router.post("/orders/{order_id}/payment")
@@ -435,6 +558,141 @@ async def validate_coupon(coupon_data: dict):
     if not coupon:
         raise HTTPException(status_code=404, detail="Invalid coupon code")
     
+
+# ============ BLOG ROUTES ============
+
+@api_router.get("/blogs")
+async def get_blogs():
+    """Get all blogs (public)"""
+    blogs = await db.blogs.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return blogs
+
+@api_router.get("/blogs/{blog_id}")
+async def get_blog(blog_id: str):
+    """Get single blog (public)"""
+    blog = await db.blogs.find_one({"id": blog_id}, {"_id": 0})
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return blog
+
+@api_router.post("/blogs/create")
+async def create_blog(blog_data: BlogCreate, user: User = Depends(get_current_user)):
+    """Create a new blog (authenticated users)"""
+    blog_id = str(uuid.uuid4())
+    blog_doc = {
+        "id": blog_id,
+        "title": blog_data.title,
+        "content": blog_data.content,
+        "author_id": user.id,
+        "author_name": user.name,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.blogs.insert_one(blog_doc)
+    return blog_doc
+
+@api_router.delete("/admin/blogs/{blog_id}")
+async def delete_blog(blog_id: str, admin: User = Depends(get_admin_user)):
+    """Delete a blog (admin only)"""
+
+# ============ CONTACT FORM ROUTES ============
+
+@api_router.post("/contact/submit")
+async def submit_contact_form(form_data: ContactFormCreate):
+    """Submit contact form (public)"""
+    form_id = str(uuid.uuid4())
+    form_doc = {
+        "id": form_id,
+        "name": form_data.name,
+        "email": form_data.email,
+        "phone": form_data.phone,
+        "address": form_data.address,
+        "feedback": form_data.feedback,
+        "status": "pending",
+        "admin_reply": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "replied_at": None
+    }
+    await db.contact_forms.insert_one(form_doc)
+    
+    # Send confirmation email to user
+    await send_email(
+        form_data.email,
+        "We Received Your Message - Wigzo Tape",
+        f"""Hi {form_data.name},
+
+Thank you for contacting Wigzo Tape!
+
+We have received your message and our team will review it shortly. We typically respond within 24-48 hours.
+
+Your Message:
+{form_data.feedback}
+
+Best regards,
+Wigzo Tape Support Team"""
+    )
+    
+    return {"message": "Contact form submitted successfully", "id": form_id}
+
+@api_router.get("/admin/contact-forms")
+async def get_contact_forms(admin: User = Depends(get_admin_user)):
+    """Get all contact forms (admin only)"""
+    forms = await db.contact_forms.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return forms
+
+@api_router.post("/admin/contact-forms/{form_id}/reply")
+async def reply_contact_form(form_id: str, reply_data: ContactFormReply, admin: User = Depends(get_admin_user)):
+    """Reply to contact form (admin only)"""
+    form = await db.contact_forms.find_one({"id": form_id})
+    if not form:
+        raise HTTPException(status_code=404, detail="Contact form not found")
+    
+    # Update form with reply
+    await db.contact_forms.update_one(
+        {"id": form_id},
+        {
+            "$set": {
+                "admin_reply": reply_data.reply,
+                "status": "replied",
+                "replied_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    # Send reply email to user
+    await send_email(
+        form['email'],
+        "Response to Your Inquiry - Wigzo Tape",
+        f"""Hi {form['name']},
+
+Thank you for reaching out to Wigzo Tape!
+
+Here is our response to your inquiry:
+
+{reply_data.reply}
+
+If you have any further questions, please don't hesitate to contact us again.
+
+Best regards,
+Wigzo Tape Support Team"""
+    )
+    
+    return {"message": "Reply sent successfully"}
+
+@api_router.delete("/admin/contact-forms/{form_id}")
+async def delete_contact_form(form_id: str, admin: User = Depends(get_admin_user)):
+    """Delete contact form (admin only)"""
+    result = await db.contact_forms.delete_one({"id": form_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Contact form not found")
+    return {"message": "Contact form deleted"}
+
+
+    result = await db.blogs.delete_one({"id": blog_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return {"message": "Blog deleted successfully"}
+
+
     if not coupon.get('is_active'):
         raise HTTPException(status_code=400, detail="Coupon is no longer active")
     

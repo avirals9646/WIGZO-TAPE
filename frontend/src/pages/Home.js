@@ -31,7 +31,7 @@ export default function Home() {
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16" data-testid="features-title">
-            WHY CHOOSE WIGZO TAPE?
+            WHY WE CHOOSE WIGZO TAPE?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="p-8 border border-gray-100 bg-white hover:border-[#17847c] transition-colors duration-300 rounded-none" data-testid="feature-strong-hold">
@@ -86,7 +86,7 @@ export default function Home() {
       <section className="py-16 md:py-24 bg-[#17847c] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6" data-testid="cta-title">
-            READY TO EXPERIENCE THE DIFFERENCE?
+            GET READY TO EXPERIENCE THE DIFFERENCE?
           </h2>
           <p className="text-xl mb-8">
             Join thousands of satisfied customers who trust Wigzo Tape for their wig applications.

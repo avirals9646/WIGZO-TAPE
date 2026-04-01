@@ -28,59 +28,138 @@ export default function Home() {
       <HomeCarousel />
 
       {/* Features Section */}
-      <section className="py-16 md:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16" data-testid="features-title">
-            WHY WE CHOOSE WIGZO TAPE?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="p-8 border border-gray-100 bg-white hover:border-[#17847c] transition-colors duration-300 rounded-none" data-testid="feature-strong-hold">
-              <Shield className="w-12 h-12 text-[#17847c] mb-4" />
-              <h3 className="text-2xl font-bold mb-4">STRONG HOLD</h3>
-              <p className="text-gray-600">
-                Medical-grade adhesive that lasts for days, even in humid conditions.
-              </p>
+      <section className="relative py-32 bg-white overflow-hidden selection:bg-[#17847c] selection:text-white">
+        {/* Decorative Background Blobs - Ye aesthetic vibes denge */}
+        <div className="absolute top-0 -left-20 w-96 h-96 bg-[#17847c]/5 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-50 rounded-full blur-[100px]" />
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+
+          {/* Ultra Modern Header */}
+          <div className="text-center mb-24 space-y-4">
+            <div className="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-[0.3em] uppercase bg-[#17847c]/10 text-[#17847c] rounded-full animate-bounce">
+              The Gold Standard
             </div>
-            <div className="p-8 border border-gray-100 bg-white hover:border-[#17847c] transition-colors duration-300 rounded-none" data-testid="feature-invisible">
-              <Zap className="w-12 h-12 text-[#17847c] mb-4" />
-              <h3 className="text-2xl font-bold mb-4">INVISIBLE FINISH</h3>
-              <p className="text-gray-600">
-                Ultra-thin design blends seamlessly with your skin for a natural look.
-              </p>
-            </div>
-            <div className="p-8 border border-gray-100 bg-white hover:border-[#17847c] transition-colors duration-300 rounded-none" data-testid="feature-skin-safe">
-              <Award className="w-12 h-12 text-[#17847c] mb-4" />
-              <h3 className="text-2xl font-bold mb-4">SKIN SAFE</h3>
-              <p className="text-gray-600">
-                Hypoallergenic formula suitable for sensitive skin, dermatologist tested.
-              </p>
-            </div>
+            <h2 className="text-5xl md:text-7xl font-black text-gray-900 leading-[1.2] tracking-tight py-2" data-testid="features-title">
+              WHY WE CHOOSE <br />
+              <span className="inline-block bg-gradient-to-r from-[#17847c] to-[#2db3a9] bg-clip-text text-transparent italic px-2 pb-2">
+                WIGZO TAPE?
+              </span>
+            </h2>
+
+            <p className="text-gray-400 max-w-xl mx-auto font-light text-lg">
+              Engineered for perfection, trusted by icons.
+            </p>
+          </div>
+
+          {/* Features Grid with Glassmorphism & Hover Glow */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              {
+                icon: Shield,
+                title: "STRONG HOLD",
+                desc: "Medical-grade adhesive that lasts for days, even in humid conditions.",
+                color: "from-emerald-500/20"
+              },
+              {
+                icon: Zap,
+                title: "INVISIBLE FINISH",
+                desc: "Ultra-thin design blends seamlessly with your skin for a natural look.",
+                color: "from-blue-500/20"
+              },
+              {
+                icon: Award,
+                title: "SKIN SAFE",
+                desc: "Hypoallergenic formula suitable for sensitive skin, dermatologist tested.",
+                color: "from-[#17847c]/20"
+              }
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="group relative p-12 bg-white/40 backdrop-blur-xl border border-gray-100 rounded-[2.5rem] transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(23,132,124,0.15)] hover:border-[#17847c]/30 overflow-hidden"
+              >
+                {/* Animated Background Glow on Hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+
+                {/* Icon Section */}
+                <div className="relative z-10 w-20 h-20 mb-10 flex items-center justify-center bg-white shadow-xl rounded-[1.5rem] group-hover:rotate-[10deg] transition-all duration-500 group-hover:bg-[#17847c] group-hover:text-white">
+                  <feature.icon className="w-10 h-10 transition-transform duration-500" />
+                </div>
+
+                {/* Text Content */}
+                <div className="relative z-10 space-y-4">
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight group-hover:translate-x-2 transition-transform duration-500">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-500 text-lg leading-relaxed font-light transition-all duration-500 group-hover:text-gray-900">
+                    {feature.desc}
+                  </p>
+                </div>
+
+                {/* Modern Progress Line */}
+                <div className="absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-[#17847c] to-emerald-300 w-0 group-hover:w-full transition-all duration-1000" />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      {featuredProducts.length > 0 && (
-        <section className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-center mb-16" data-testid="featured-products-title">
-              FEATURED PRODUCTS
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-            <div className="text-center mt-12">
-              <Link to="/products">
-                <Button className="btn-secondary" data-testid="view-all-products-button">
-                  View All Products
-                </Button>
-              </Link>
+
+
+{/* Featured Products Section */}
+{featuredProducts.length > 0 && (
+  <section className="relative py-24 bg-[#fcfcfc]">
+    <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      
+      {/* Header Section */}
+      <div className="text-center mb-16 space-y-3">
+        <span className="text-[#17847c] font-bold tracking-[0.3em] text-[10px] uppercase">
+          Exclusive Items
+        </span>
+        <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+          FEATURED <span className="text-[#17847c]">PRODUCTS</span>
+        </h2>
+        <div className="w-16 h-1 bg-[#17847c] mx-auto rounded-full" />
+      </div>
+
+      {/* Grid: Safest way to show cards with hover animation */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+        {featuredProducts.map((product) => (
+          <div 
+            key={product.id} 
+            className="group transform transition-all duration-500 hover:-translate-y-3"
+          >
+            {/* Direct ProductCard (Jo image wala design tumne manga tha) */}
+            <div className="bg-white rounded-[2.5rem] overflow-hidden hover:shadow-[0_30px_60px_rgba(23,132,124,0.1)] transition-shadow duration-500">
+              <ProductCard product={product} />
             </div>
           </div>
-        </section>
-      )}
+        ))}
+      </div>
+
+      {/* View All Button */}
+      <div className="text-center mt-20">
+        <Link to="/products" className="inline-block">
+          <button 
+            className="px-10 py-4 font-bold text-white rounded-full bg-[#17847c] shadow-lg hover:shadow-[#17847c]/40 hover:scale-105 active:scale-95 transition-all duration-300"
+            data-testid="view-all-products-button"
+          >
+            <span className="flex items-center gap-2">
+              View All Products
+              <svg xmlns="http://w3.org" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </span>
+          </button>
+        </Link>
+      </div>
+    </div>
+  </section>
+)}
+
+
+
+
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-[#17847c] text-white">

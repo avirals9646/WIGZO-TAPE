@@ -12,6 +12,13 @@ module.exports = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+
+		keyframes: {
+  kenburns: {
+    '0%': { transform: 'scale(1)' },
+    '100%': { transform: 'scale(1.2)' },
+  }
+},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -80,3 +87,6 @@ module.exports = {
   },
   plugins: [require("tailwindcss-animate")],
 };
+
+// tailwind.config.js ke andar extend mein ye daal dena
+

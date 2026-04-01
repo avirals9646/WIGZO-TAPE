@@ -86,10 +86,27 @@ export default function HomeCarousel() {
         </CarouselContent>
 
         {/* 5. Modern Nav Buttons */}
-        <div className="absolute bottom-12 right-12 flex gap-4 z-30">
-          <CarouselPrevious className="static translate-y-0 w-14 h-14 rounded-full border-white/20 bg-white/5 backdrop-blur-lg text-white hover:bg-[#17847c] transition-all duration-500" />
-          <CarouselNext className="static translate-y-0 w-14 h-14 rounded-full border-white/20 bg-white/5 backdrop-blur-lg text-white hover:bg-[#17847c] transition-all duration-500" />
-        </div>
+        <div className="absolute bottom-12 right-12 flex items-center gap-6 z-30">
+  {/* Left Arrow (Previous) */}
+  <CarouselPrevious className="group/nav relative static translate-y-0 w-16 h-16 rounded-full border-white/10 bg-white/5 backdrop-blur-2xl text-white transition-all duration-500 hover:w-24 hover:bg-[#17847c] hover:border-[#17847c] shadow-2xl flex items-center justify-center">
+    <div className="relative overflow-hidden w-full h-full flex items-center justify-center">
+      <span className="group-hover/nav:-translate-x-10 transition-transform duration-500 font-light text-2xl">←</span>
+      <span className="absolute translate-x-10 group-hover/nav:translate-x-0 transition-transform duration-500 font-bold text-sm tracking-tighter opacity-0 group-hover/nav:opacity-100">PREV</span>
+    </div>
+  </CarouselPrevious>
+
+  {/* Right Arrow (Next) */}
+  <CarouselNext className="group/nav relative static translate-y-0 w-16 h-16 rounded-full border-white/10 bg-white/5 backdrop-blur-2xl text-white transition-all duration-500 hover:w-24 hover:bg-[#17847c] hover:border-[#17847c] shadow-2xl flex items-center justify-center">
+    <div className="relative overflow-hidden w-full h-full flex items-center justify-center">
+      <span className="group-hover/nav:translate-x-10 transition-transform duration-500 font-light text-2xl">→</span>
+      <span className="absolute -translate-x-10 group-hover/nav:translate-x-0 transition-transform duration-500 font-bold text-sm tracking-tighter opacity-0 group-hover/nav:opacity-100">NEXT</span>
+    </div>
+  </CarouselNext>
+
+  {/* Decorative Animated Ring */}
+  <div className="absolute -inset-2 border border-white/5 rounded-full animate-[spin_10s_linear_infinite] pointer-events-none opacity-20" />
+</div>
+
       </Carousel>
     </div>
   );

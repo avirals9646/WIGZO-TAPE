@@ -18,7 +18,11 @@ export default function Blogs() {
     try {
       setLoading(true);
       const response = await api.get('/blogs');
-      setBlogs(response.data);
+      // Sort newest first on frontend too (safety net)
+      const sorted = (response.data || []).sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      setBlogs(sorted);
     } catch (error) {
       console.error('Failed to fetch blogs:', error);
     } finally {
@@ -86,14 +90,12 @@ export default function Blogs() {
               <Link
                 key={blog.id}
                 to={`/blogs/${blog.id}`}
-                className="group relative flex flex-col h-full opacity-0 animate-in fade-in slide-in-from-bottom-10 fill-mode-forwards"
+                className="group relative flex flex-col h-full"
                 style={{ animationDelay: `${index * 150}ms` }}
                 data-testid={`blog-card-${blog.id}`}
               >
-                {/* Card Container */}
                 <div className="flex-1 bg-white rounded-[2.5rem] p-8 border border-gray-50 transition-all duration-500 group-hover:shadow-[0_40px_80px_-15px_rgba(23,132,124,0.12)] group-hover:-translate-y-3 flex flex-col">
                   
-                  {/* Category/Date Header */}
                   <div className="flex justify-between items-center mb-8">
                     <span className="bg-[#17847c]/5 text-[#17847c] text-[10px] font-black px-3 py-1 rounded-full tracking-widest uppercase">
                       Insight
@@ -104,7 +106,6 @@ export default function Blogs() {
                     </div>
                   </div>
 
-                  {/* Blog Content */}
                   <div className="space-y-4 mb-8">
                     <h2 className="text-2xl font-black text-gray-900 leading-tight group-hover:text-[#17847c] transition-colors duration-300 line-clamp-2">
                       {blog.title}
@@ -114,7 +115,6 @@ export default function Blogs() {
                     </p>
                   </div>
 
-                  {/* Footer Info */}
                   <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">

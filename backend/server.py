@@ -480,16 +480,13 @@ async def get_order(order_id: str, user: User = Depends(get_current_user)):
 
 @api_router.get("/blogs")
 async def get_blogs():
-    blogs = await db.blogs.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    blogs = await db.blogs.find({}, {"_id": 0}).to_list(1000)
+    # Sort in Python to avoid MongoDB string-sort issues with ISO dates
+    blogs.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return blogs
 
-@api_router.get("/blogs/{blog_id}")
-async def get_blog(blog_id: str):
-    blog = await db.blogs.find_one({"id": blog_id}, {"_id": 0})
-    if not blog:
-        raise HTTPException(status_code=404, detail="Blog not found")
-    return blog
-
+# IMPORTANT: /blogs/create POST must be defined before GET /blogs/{blog_id}
+# to avoid FastAPI treating "create" as a blog_id
 @api_router.post("/blogs/create")
 async def create_blog(blog_data: BlogCreate, user: User = Depends(get_current_user)):
     blog_id = str(uuid.uuid4())
@@ -502,8 +499,14 @@ async def create_blog(blog_data: BlogCreate, user: User = Depends(get_current_us
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.blogs.insert_one(blog_doc)
-    # FIX 3: {"_id": 0} se ObjectId exclude — yahi original 500 error ki wajah thi
     return await db.blogs.find_one({"id": blog_id}, {"_id": 0})
+
+@api_router.get("/blogs/{blog_id}")
+async def get_blog(blog_id: str):
+    blog = await db.blogs.find_one({"id": blog_id}, {"_id": 0})
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return blog
 
 @api_router.delete("/admin/blogs/{blog_id}")
 async def delete_blog(blog_id: str, admin: User = Depends(get_admin_user)):

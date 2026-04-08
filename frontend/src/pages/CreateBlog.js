@@ -16,7 +16,6 @@ export default function CreateBlog() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Scroll to top on load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -30,23 +29,35 @@ export default function CreateBlog() {
       return;
     }
 
-    if (content.length < 50) {
-      toast.error('Article content is too short!');
+    if (title.trim().length < 3) {
+      toast.error('Title is too short!');
+      return;
+    }
+
+    if (content.trim().length < 50) {
+      toast.error('Article content is too short (min 50 characters)!');
       return;
     }
 
     try {
       setLoading(true);
-      // Backend route check: /api/blogs/create
-      await api.post('/blogs/create', { 
+      
+      const response = await api.post('/blogs/create', { 
         title: title.trim(), 
         content: content.trim() 
       });
-      toast.success('Your masterpiece has been published!');
-      navigate('/blogs');
+
+      // Verify we got a valid blog back
+      if (response.data && response.data.id) {
+        toast.success('Your article has been published!');
+        // Small delay so toast is visible, then navigate
+        setTimeout(() => navigate('/blogs'), 500);
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
       console.error('Failed to create blog:', error);
-      const errorMsg = error.response?.data?.detail || 'Failed to publish blog. Check backend connection.';
+      const errorMsg = error.response?.data?.detail || 'Failed to publish. Please try again.';
       toast.error(errorMsg);
     } finally {
       setLoading(false);
@@ -70,12 +81,10 @@ export default function CreateBlog() {
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] py-20 relative overflow-hidden" data-testid="create-blog-page">
-      {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
         
-        {/* Navigation Back */}
         <button 
           onClick={() => navigate('/blogs')} 
           className="group mb-12 flex items-center gap-2 text-xs font-black tracking-widest text-gray-400 hover:text-primary transition-all"
@@ -84,7 +93,6 @@ export default function CreateBlog() {
           BACK TO JOURNAL
         </button>
 
-        {/* Header */}
         <div className="mb-16 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-1000">
           <div className="flex items-center gap-3">
             <Sparkles className="w-5 h-5 text-primary animate-pulse" />
@@ -96,7 +104,6 @@ export default function CreateBlog() {
           <p className="text-gray-400 text-lg font-light">Share your professional expertise with the Wigzo community.</p>
         </div>
 
-        {/* Editor Form */}
         <form 
           onSubmit={handleSubmit} 
           className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-1000"
@@ -104,23 +111,28 @@ export default function CreateBlog() {
           <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] border border-gray-100">
             <div className="space-y-12">
               
-              {/* Title Input */}
+              {/* Title */}
               <div className="space-y-2">
-                <Label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-1">Article Headline</Label>
+                <Label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-1">
+                  Article Headline *
+                </Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  minLength={3}
                   className="border-0 border-b-2 border-gray-100 rounded-none focus-visible:ring-0 focus-visible:border-primary px-1 bg-transparent text-3xl md:text-4xl font-black tracking-tight placeholder:text-gray-100 py-8 h-auto transition-all"
                   placeholder="The Secret to Perfect Adhesion..."
                   data-testid="blog-title-input"
                 />
               </div>
 
-              {/* Content Input */}
+              {/* Content */}
               <div className="space-y-2">
-                <Label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-1">Your Story</Label>
+                <Label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-1">
+                  Your Story * <span className="text-gray-300 font-normal normal-case tracking-normal">({content.length} chars, min 50)</span>
+                </Label>
                 <Textarea
                   id="content"
                   value={content}
@@ -131,16 +143,22 @@ export default function CreateBlog() {
                   placeholder="Start sharing your thoughts here..."
                   data-testid="blog-content-input"
                 />
+                {/* Character count warning */}
+                {content.length > 0 && content.length < 50 && (
+                  <p className="text-xs text-red-400 ml-1">
+                    {50 - content.length} more characters needed
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
-              disabled={loading}
-              className="flex-1 h-16 bg-primary hover:bg-black text-white rounded-2xl font-black tracking-[0.2em] shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+              disabled={loading || content.trim().length < 50 || title.trim().length < 3}
+              className="flex-1 h-16 bg-primary hover:bg-black text-white rounded-2xl font-black tracking-[0.2em] shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="publish-blog-button"
             >
               {loading ? 'PUBLISHING...' : 'PUBLISH TO JOURNAL'}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '../components/ui/textarea';
 import { useAuth } from '../AuthContext';
 import api from '../api';
 import { toast } from 'sonner';
+import { PenLine, ArrowLeft, Send, Sparkles } from 'lucide-react';
 
 export default function CreateBlog() {
   const [title, setTitle] = useState('');
@@ -14,6 +15,11 @@ export default function CreateBlog() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Scroll to top on load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,14 +30,24 @@ export default function CreateBlog() {
       return;
     }
 
+    if (content.length < 50) {
+      toast.error('Article content is too short!');
+      return;
+    }
+
     try {
       setLoading(true);
-      await api.post('/blogs/create', { title, content });
-      toast.success('Blog published successfully!');
+      // Backend route check: /api/blogs/create
+      await api.post('/blogs/create', { 
+        title: title.trim(), 
+        content: content.trim() 
+      });
+      toast.success('Your masterpiece has been published!');
       navigate('/blogs');
     } catch (error) {
       console.error('Failed to create blog:', error);
-      toast.error('Failed to publish blog');
+      const errorMsg = error.response?.data?.detail || 'Failed to publish blog. Check backend connection.';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -39,65 +55,104 @@ export default function CreateBlog() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Please login to write articles</h2>
-          <Button onClick={() => navigate('/login')} className="btn-primary">
-            Login
-          </Button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fcfcfc] px-6 text-center">
+        <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mb-6">
+          <PenLine className="w-10 h-10 text-primary/40" />
         </div>
+        <h2 className="text-3xl font-black tracking-tighter text-gray-900 mb-4 uppercase">Access Restricted</h2>
+        <p className="text-gray-500 font-light mb-8 max-w-sm">Please sign in to your professional account to contribute to the Wigzo Journal.</p>
+        <Button onClick={() => navigate('/login')} className="bg-primary hover:bg-black text-white px-10 py-6 rounded-2xl font-bold tracking-widest transition-all shadow-xl shadow-primary/20">
+          LOGIN TO CONTINUE
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-16" data-testid="create-blog-page">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl md:text-5xl font-bold mb-8">WRITE ARTICLE</h1>
+    <div className="min-h-screen bg-[#fcfcfc] py-20 relative overflow-hidden" data-testid="create-blog-page">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-gray-200 p-8 rounded-none">
-          <div>
-            <Label htmlFor="title">Article Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              className="mt-1 rounded-none"
-              placeholder="Enter your article title"
-              data-testid="blog-title-input"
-            />
+      <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
+        
+        {/* Navigation Back */}
+        <button 
+          onClick={() => navigate('/blogs')} 
+          className="group mb-12 flex items-center gap-2 text-xs font-black tracking-widest text-gray-400 hover:text-primary transition-all"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          BACK TO JOURNAL
+        </button>
+
+        {/* Header */}
+        <div className="mb-16 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+            <span className="text-primary font-black tracking-[0.4em] text-[10px] uppercase">New Insight</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tighter leading-none">
+            WRITE <span className="text-primary italic pr-4">ARTICLE</span>
+          </h1>
+          <p className="text-gray-400 text-lg font-light">Share your professional expertise with the Wigzo community.</p>
+        </div>
+
+        {/* Editor Form */}
+        <form 
+          onSubmit={handleSubmit} 
+          className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-1000"
+        >
+          <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] border border-gray-100">
+            <div className="space-y-12">
+              
+              {/* Title Input */}
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-1">Article Headline</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className="border-0 border-b-2 border-gray-100 rounded-none focus-visible:ring-0 focus-visible:border-primary px-1 bg-transparent text-3xl md:text-4xl font-black tracking-tight placeholder:text-gray-100 py-8 h-auto transition-all"
+                  placeholder="The Secret to Perfect Adhesion..."
+                  data-testid="blog-title-input"
+                />
+              </div>
+
+              {/* Content Input */}
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-1">Your Story</Label>
+                <Textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                  rows={12}
+                  className="border-0 bg-gray-50/50 rounded-3xl focus-visible:ring-1 focus-visible:ring-primary/20 p-8 text-lg font-light leading-relaxed placeholder:text-gray-300 resize-none transition-all"
+                  placeholder="Start sharing your thoughts here..."
+                  data-testid="blog-content-input"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="content">Content *</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              rows={15}
-              className="mt-1 rounded-none"
-              placeholder="Write your article here..."
-              data-testid="blog-content-input"
-            />
-          </div>
-
-          <div className="flex gap-4">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
               disabled={loading}
-              className="btn-primary"
+              className="flex-1 h-16 bg-primary hover:bg-black text-white rounded-2xl font-black tracking-[0.2em] shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3"
               data-testid="publish-blog-button"
             >
-              {loading ? 'Publishing...' : 'Publish Article'}
+              {loading ? 'PUBLISHING...' : 'PUBLISH TO JOURNAL'}
+              <Send className="w-4 h-4" />
             </Button>
+            
             <Button
               type="button"
               onClick={() => navigate('/blogs')}
-              className="btn-secondary"
+              className="px-10 h-16 bg-white border border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl font-bold transition-all"
             >
-              Cancel
+              DISCARD
             </Button>
           </div>
         </form>

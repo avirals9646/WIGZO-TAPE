@@ -106,77 +106,105 @@ export default function Home() {
 
 
 
-{/* Featured Products Section */}
-{featuredProducts.length > 0 && (
-  <section className="relative py-24 bg-[#fcfcfc]">
-    <div className="max-w-7xl mx-auto px-6 lg:px-8">
-      
-      {/* Header Section */}
-      <div className="text-center mb-16 space-y-3">
-        <span className="text-[#17847c] font-bold tracking-[0.3em] text-[10px] uppercase">
-          Exclusive Items
-        </span>
-        <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-          FEATURED <span className="text-[#17847c]">PRODUCTS</span>
-        </h2>
-        <div className="w-16 h-1 bg-[#17847c] mx-auto rounded-full" />
-      </div>
+      {/* Featured Products Section */}
+      {featuredProducts.length > 0 && (
+        <section className="relative py-24 bg-[#fcfcfc]">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-      {/* Grid: Safest way to show cards with hover animation */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-        {featuredProducts.map((product) => (
-          <div 
-            key={product.id} 
-            className="group transform transition-all duration-500 hover:-translate-y-3"
-          >
-            {/* Direct ProductCard (Jo image wala design tumne manga tha) */}
-            <div className="bg-white rounded-[2.5rem] overflow-hidden hover:shadow-[0_30px_60px_rgba(23,132,124,0.1)] transition-shadow duration-500">
-              <ProductCard product={product} />
+            {/* Header Section */}
+            <div className="text-center mb-16 space-y-3">
+              <span className="text-[#17847c] font-bold tracking-[0.3em] text-[10px] uppercase">
+                Exclusive Items
+              </span>
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                FEATURED <span className="text-[#17847c]">PRODUCTS</span>
+              </h2>
+              <div className="w-16 h-1 bg-[#17847c] mx-auto rounded-full" />
+            </div>
+
+            {/* Grid: Safest way to show cards with hover animation */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+              {featuredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group transform transition-all duration-500 hover:-translate-y-3"
+                >
+                  {/* Direct ProductCard (Jo image wala design tumne manga tha) */}
+                  <div className="bg-white rounded-[2.5rem] overflow-hidden hover:shadow-[0_30px_60px_rgba(23,132,124,0.1)] transition-shadow duration-500">
+                    <ProductCard product={product} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* View All Button */}
+            <div className="text-center mt-20">
+              <Link to="/products" className="inline-block">
+                <button
+                  className="px-10 py-4 font-bold text-white rounded-full bg-[#17847c] shadow-lg hover:shadow-[#17847c]/40 hover:scale-105 active:scale-95 transition-all duration-300"
+                  data-testid="view-all-products-button"
+                >
+                  <span className="flex items-center gap-2">
+                    View All Products
+                    <svg xmlns="http://w3.org" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </span>
+                </button>
+              </Link>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* View All Button */}
-      <div className="text-center mt-20">
-        <Link to="/products" className="inline-block">
-          <button 
-            className="px-10 py-4 font-bold text-white rounded-full bg-[#17847c] shadow-lg hover:shadow-[#17847c]/40 hover:scale-105 active:scale-95 transition-all duration-300"
-            data-testid="view-all-products-button"
-          >
-            <span className="flex items-center gap-2">
-              View All Products
-              <svg xmlns="http://w3.org" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </span>
-          </button>
-        </Link>
-      </div>
-    </div>
-  </section>
-)}
+        </section>
+      )}
 
 
 
 
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-[#17847c] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6" data-testid="cta-title">
-            GET READY TO EXPERIENCE THE DIFFERENCE?
-          </h2>
-          <p className="text-xl mb-8">
-            Join thousands of satisfied customers who trust Wigzo Tape for their wig applications.
-          </p>
-          <Link to="/products">
-            <Button className="bg-black text-white hover:bg-white hover:text-black rounded-none uppercase tracking-wider font-bold px-8 py-3 transition-all duration-300" data-testid="cta-button">
-              Shop Now
-            </Button>
-          </Link>
+     <section className="relative py-20 md:py-24 bg-[#17847c] overflow-hidden">
+  {/* Background Aesthetic Elements */}
+  <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+    <div className="absolute -top-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-[80px]" />
+    <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-black/5 rounded-full blur-[80px]" />
+  </div>
+
+  <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+    {/* Minimal Icon */}
+    <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 backdrop-blur-lg rounded-2xl mb-6 border border-white/20">
+      <svg xmlns="http://w3.org" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+      </svg>
+    </div>
+
+    {/* Balanced Typography */}
+    <h2 className="text-3xl md:text-5xl font-black text-white mb-6 leading-tight tracking-tight" data-testid="cta-title">
+      READY TO EXPERIENCE <br />
+      <span className="text-emerald-200 italic">THE DIFFERENCE?</span>
+    </h2>
+
+    <p className="text-lg md:text-xl text-emerald-50/70 mb-10 max-w-xl mx-auto font-light leading-relaxed">
+      Join <span className="text-white font-semibold">10,000+</span> professionals who trust the world's most invisible hold.
+    </p>
+
+    {/* Luxury Pill Button */}
+    <Link to="/products" className="inline-block group">
+      <button 
+        className="relative px-10 py-4 bg-black text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-black/20"
+        data-testid="cta-button"
+      >
+        <div className="relative z-10 flex items-center gap-3">
+          <span className="text-xs font-bold tracking-[0.2em] uppercase">Shop Collection</span>
+          <svg xmlns="http://w3.org" className="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
         </div>
-      </section>
+      </button>
+    </Link>
+  </div>
+</section>
+
+
     </div>
   );
 }

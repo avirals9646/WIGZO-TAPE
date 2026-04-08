@@ -122,7 +122,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black tracking-[0.2em] text-gray-500 uppercase mb-1">Email Us</p>
-                    <p className="text-lg font-medium">support@wigzotape.com</p>
+                    <p className="text-lg font-medium">wigzotapes@gmail.com</p>
                   </div>
                 </div>
 
@@ -132,7 +132,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black tracking-[0.2em] text-gray-500 uppercase mb-1">Call Anytime</p>
-                    <p className="text-lg font-medium">+91 12345 67890</p>
+                    <p className="text-lg font-medium">+91 7217693925</p>
                   </div>
                 </div>
               </div>

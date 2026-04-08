@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Twitter, Mail, ArrowUpRight, Linkedin, Code2 } from 'lucide-react';
+import { Facebook, Instagram, MapPinIcon, Mail, ArrowUpRight, Linkedin, Code2, Phone, MapPin } from 'lucide-react';
+
 
 export default function Footer() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -26,13 +27,14 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               {[
-                { Icon: Instagram, href: "#" },
-                { Icon: Facebook, href: "#" },
-                { Icon: Twitter, href: "#" }
+                { Icon: Instagram, href: "https://www.instagram.com/wigzo_tapes?igsh=MXE2MjA1cW9qbGZjMw%3D%3D&utm_source=qr" },
+                { Icon: Facebook, href: "https://www.facebook.com/share/18KWyeUk3R/?mibextid=wwXIfr" },
+                { Icon: MapPinIcon, href: "https://maps.app.goo.gl/5LA8DPaUrKHqpSso6?g_st=iw" }
               ].map((social, i) => (
                 <a
                   key={i}
                   href={social.href}
+                  target="_blank" 
                   className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#17847c] hover:border-[#17847c] hover:-translate-y-2 transition-all duration-500 group"
                 >
                   <social.Icon className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:scale-110 transition-all" />
@@ -42,7 +44,7 @@ export default function Footer() {
           </div>
 
           {/* Navigation Links */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-6 ">
             <h3 className="text-[#17847c] font-black tracking-[0.2em] text-xs uppercase">Company</h3>
             <ul className="space-y-4">
               {['Home', 'Products', 'About Us', 'Contact'].map((item) => (
@@ -59,15 +61,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal / Service */}
-          <div className="md:col-span-2 space-y-6">
-            <h3 className="text-[#17847c] font-black tracking-[0.2em] text-xs uppercase">Support</h3>
-            <ul className="space-y-4 text-sm text-gray-400 font-light">
-              <li className="hover:text-white transition-colors cursor-pointer">Shipping Info</li>
-              <li className="hover:text-white transition-colors cursor-pointer">Returns & Policy</li>
-              <li className="hover:text-white transition-colors cursor-pointer">Privacy</li>
-            </ul>
-          </div>
+        
 
           {/* Newsletter / Contact */}
           <div className="md:col-span-4 space-y-8">
@@ -83,8 +77,23 @@ export default function Footer() {
               </button>
             </div>
             <div className="flex items-center gap-3 text-gray-400 text-sm">
-              <Mail className="w-4 h-4 text-[#17847c]" />
-              <span>support@wigzotape.com</span>
+              <Mail className="w-4 h-4 text-[#17847c]" />      
+              <span>wigzotapes@gmail.com</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-400 text-sm">
+              <Phone className="w-4 h-4 text-[#17847c]" />
+              <span>+91 7217693925</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-400 text-sm">
+              <MapPin className="w-4 h-4 text-[#17847c]" />
+              <a
+                href="https://maps.app.goo.gl/5LA8DPaUrKHqpSso6?g_st=iw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#17847c] transition-colors underline underline-offset-2"
+              >
+                 H-38, Street No 4, Brahmpuri, Delhi - 110053
+              </a>
             </div>
           </div>
         </div>
@@ -99,69 +108,69 @@ export default function Footer() {
             {/* Developer Badge */}
             {/* Developer Badge for Two Creators */}
             {/* Developers Section - Two Separate Aesthetic Boxes */}
-           {/* Developers Section - Inbox aur LinkedIn Connect ke saath */}
-<div className="flex flex-wrap gap-4 mt-6">
-  
-  {/* Developer 1 */}
-  <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md group hover:border-[#17847c]/50 transition-all duration-500">
-    <div className="w-8 h-8 rounded-xl bg-[#17847c]/10 flex items-center justify-center text-[#17847c] group-hover:bg-primary group-hover:text-white transition-all">
-      <Code2 className="w-4 h-4" />
-    </div>
-    <div className="flex flex-col text-left">
-      <span className="text-[9px] font-black tracking-widest text-gray-500 uppercase leading-none mb-1">Developed BY</span>
-      <span className="text-xs font-bold text-gray-200">Sarthak Kesarwani</span>
-    </div>
-    <div className="flex gap-2 ml-2 border-l border-white/10 pl-2">
-      {/* Mailto link: Isse direct Inbox khulega */}
-      <a href="sarthakkesarwani2001@gmil.com" title="Send Email" className="text-gray-500 hover:text-[#17847c] transition-colors">
-        <Mail className="w-3.5 h-3.5" />
-      </a>
-      {/* LinkedIn direct link */}
-      <a href="https://www.linkedin.com/in/sarthak8858/" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" className="text-gray-500 hover:text-[#17847c] transition-colors">
-        <Linkedin className="w-3.5 h-3.5" />
-      </a>
-    </div>
-  </div>
+            {/* Developers Section - Inbox aur LinkedIn Connect ke saath */}
+            <div className="flex flex-wrap gap-4 mt-6">
 
-  {/* Developer 2 */}
-  <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md group hover:border-[#17847c]/50 transition-all duration-500">
-    <div className="w-8 h-8 rounded-xl bg-[#17847c]/10 flex items-center justify-center text-[#17847c] group-hover:bg-primary group-hover:text-white transition-all">
-      <Code2 className="w-4 h-4" />
-    </div>
-    <div className="flex flex-col text-left">
-      <span className="text-[9px] font-black tracking-widest text-gray-500 uppercase leading-none mb-1">Developed BY</span>
-      <span className="text-xs font-bold text-gray-200">Aviral Srivastava</span>
-    </div>
-    <div className="flex gap-2 ml-2 border-l border-white/10 pl-2">
-      <a href="mailto:p2@email.com" title="Send Email" className="text-gray-500 hover:text-[#17847c] transition-colors">
-        <Mail className="w-3.5 h-3.5" />
-      </a>
-      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" className="text-gray-500 hover:text-[#17847c] transition-colors">
-        <Linkedin className="w-3.5 h-3.5" />
-      </a>
-    </div>
-  </div>
+              {/* Developer 1 */}
+              <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md group hover:border-[#17847c]/50 transition-all duration-500">
+                <div className="w-8 h-8 rounded-xl bg-[#17847c]/10 flex items-center justify-center text-[#17847c] group-hover:bg-primary group-hover:text-white transition-all">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[9px] font-black tracking-widest text-gray-500 uppercase leading-none mb-1">Developed BY</span>
+                  <span className="text-xs font-bold text-gray-200">Sarthak Kesarwani</span>
+                </div>
+                <div className="flex gap-2 ml-2 border-l border-white/10 pl-2">
+                  {/* Mailto link: Isse direct Inbox khulega */}
+                  <a href="sarthakkesarwani2001@gmil.com" title="Send Email" className="text-gray-500 hover:text-[#17847c] transition-colors">
+                    <Mail className="w-3.5 h-3.5" />
+                  </a>
+                  {/* LinkedIn direct link */}
+                  <a href="https://www.linkedin.com/in/sarthak8858/" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" className="text-gray-500 hover:text-[#17847c] transition-colors">
+                    <Linkedin className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
 
-    {/* Developer 3 */}
-  <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md group hover:border-[#17847c]/50 transition-all duration-500">
-    <div className="w-8 h-8 rounded-xl bg-[#17847c]/10 flex items-center justify-center text-[#17847c] group-hover:bg-primary group-hover:text-white transition-all">
-      <Code2 className="w-4 h-4" />
-    </div>
-    <div className="flex flex-col text-left">
-      <span className="text-[9px] font-black tracking-widest text-gray-500 uppercase leading-none mb-1">Developed BY</span>
-      <span className="text-xs font-bold text-gray-200">Pranav Mishra</span>
-    </div>
-    <div className="flex gap-2 ml-2 border-l border-white/10 pl-2">
-      <a href="mailto:p2@email.com" title="Send Email" className="text-gray-500 hover:text-[#17847c] transition-colors">
-        <Mail className="w-3.5 h-3.5" />
-      </a>
-      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" className="text-gray-500 hover:text-[#17847c] transition-colors">
-        <Linkedin className="w-3.5 h-3.5" />
-      </a>
-    </div>
-  </div>
+              {/* Developer 2 */}
+              <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md group hover:border-[#17847c]/50 transition-all duration-500">
+                <div className="w-8 h-8 rounded-xl bg-[#17847c]/10 flex items-center justify-center text-[#17847c] group-hover:bg-primary group-hover:text-white transition-all">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[9px] font-black tracking-widest text-gray-500 uppercase leading-none mb-1">Developed BY</span>
+                  <span className="text-xs font-bold text-gray-200">Aviral Srivastava</span>
+                </div>
+                <div className="flex gap-2 ml-2 border-l border-white/10 pl-2">
+                  <a href="mailto:p2@email.com" title="Send Email" className="text-gray-500 hover:text-[#17847c] transition-colors">
+                    <Mail className="w-3.5 h-3.5" />
+                  </a>
+                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" className="text-gray-500 hover:text-[#17847c] transition-colors">
+                    <Linkedin className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
 
-</div>
+              {/* Developer 3 */}
+              <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md group hover:border-[#17847c]/50 transition-all duration-500">
+                <div className="w-8 h-8 rounded-xl bg-[#17847c]/10 flex items-center justify-center text-[#17847c] group-hover:bg-primary group-hover:text-white transition-all">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[9px] font-black tracking-widest text-gray-500 uppercase leading-none mb-1">Developed BY</span>
+                  <span className="text-xs font-bold text-gray-200">Pranav Mishra</span>
+                </div>
+                <div className="flex gap-2 ml-2 border-l border-white/10 pl-2">
+                  <a href="mailto:p2@email.com" title="Send Email" className="text-gray-500 hover:text-[#17847c] transition-colors">
+                    <Mail className="w-3.5 h-3.5" />
+                  </a>
+                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" className="text-gray-500 hover:text-[#17847c] transition-colors">
+                    <Linkedin className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+            </div>
 
 
 

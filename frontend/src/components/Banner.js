@@ -43,7 +43,7 @@ export default function Banner() {
 
       {/* Close Button - Clean & Minimal */}
       <button
-        onClick={() => setShow(false)}
+        onClick={() => setShow(true)}
         className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-black/10 transition-all duration-300 group"
         data-testid="close-banner"
       >

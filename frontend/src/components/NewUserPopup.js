@@ -6,30 +6,24 @@ export default function NewUserPopup() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup');
-    if (!hasSeenPopup) {
-      const timer = setTimeout(() => setShow(true), 2000);
-      return () => clearTimeout(timer);
-    }
+    // Har refresh par ye timer chalega aur popup dikhayega
+    const timer = setTimeout(() => setShow(true), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
-    setShow(false);
-    localStorage.setItem('hasSeenWelcomePopup', 'true');
+    setShow(false); // Yahan pehle 'true' tha, ise 'false' kar diya taaki popup band ho
   };
 
   if (!show) return null;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-in fade-in duration-500">
-      
-      {/* Main Popup Card */}
       <div className="bg-white rounded-[2.5rem] max-w-lg w-full overflow-hidden relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)] animate-in zoom-in-95 slide-in-from-bottom-10 duration-700">
         
         {/* Top Decorative Banner */}
         <div className="h-32 bg-gradient-to-r from-[#17847c] to-[#2db3a9] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-10 -mb-10 blur-xl" />
           <div className="absolute inset-0 flex items-center justify-center">
              <div className="bg-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl animate-bounce">
                 <Sparkles className="w-10 h-10 text-white" />
@@ -59,7 +53,6 @@ export default function NewUserPopup() {
             Your journey to invisible confidence starts here.
           </p>
 
-          {/* Offer Box - Aesthetic Design */}
           <div className="relative group mb-8">
             <div className="absolute -inset-1 bg-gradient-to-r from-[#17847c] to-emerald-400 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
             <div className="relative bg-[#fcfcfc] border border-gray-100 p-8 rounded-3xl">
@@ -71,7 +64,6 @@ export default function NewUserPopup() {
             </div>
           </div>
 
-          {/* Action Button */}
           <Button
             onClick={handleClose}
             className="w-full h-16 bg-[#17847c] hover:bg-[#116660] text-white rounded-2xl text-lg font-bold shadow-xl shadow-[#17847c]/20 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3"
@@ -88,7 +80,6 @@ export default function NewUserPopup() {
           </button>
         </div>
 
-        {/* Bottom Accent Line */}
         <div className="h-2 bg-gradient-to-r from-[#17847c] via-emerald-400 to-[#17847c]" />
       </div>
     </div>

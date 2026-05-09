@@ -187,20 +187,82 @@ export default function Checkout() {
     } finally { setCouponLoading(false); }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); setProcessing(true);
-    try {
-      const items = products.map(p => ({ product_id: p.id, name: p.name, price: p.price, quantity: getQty(p.id), image_url: p.image_url }));
-      const orderRes = await api.post('/orders/create', { items, total_amount: calcTotal(), shipping_address: formData, coupon_code: appliedCoupon?.coupon_details?.code || null });
-      const orderId = orderRes.data.id;
-      await new Promise((res, rej) => window.confirm(`Complete payment of ₹${calcTotal().toFixed(2)}?\n\n(Dummy payment)`) ? res() : rej());
-      await api.post(`/orders/${orderId}/payment`, { razorpay_payment_id: 'dummy_payment_id', razorpay_order_id: orderId });
-      toast.success('Order placed successfully!');
-      await clearCart();
-      navigate('/dashboard');
-    } catch { toast.error('Failed to place order.'); }
-    finally { setProcessing(false); }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setProcessing(true);
+
+  try {
+    // 1. DB mein order banao
+    const items = products.map(p => ({
+      product_id: p.id, name: p.name, price: p.price,
+      quantity: getQty(p.id), image_url: p.image_url
+    }));
+
+    const orderRes = await api.post('/orders/create', {
+      items,
+      total_amount: calcTotal(),   // subtotal bhejo, backend khud discount lagata hai
+      shipping_address: formData,
+      coupon_code: appliedCoupon?.coupon_details?.code || null
+    });
+    const orderId = orderRes.data.id;
+
+    // 2. Razorpay order banao
+    const rzpOrderRes = await api.post('/payments/create-order', {
+      amount: finalTotal()
+    });
+    const rzpOrder = rzpOrderRes.data;
+
+    // 3. Razorpay modal kholo
+    await new Promise((resolve, reject) => {
+      const options = {
+        key: 'rzp_test_SnL4lcttenJnZV',
+        amount: rzpOrder.amount,
+        currency: 'INR',
+        name: 'Wigzo Tape',
+        description: 'Order Payment',
+        order_id: rzpOrder.id,
+        handler: async function (response) {
+          try {
+            // 4. Signature verify karo
+            await api.post('/payments/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            // 5. Order ko paid mark karo
+            await api.post(`/orders/${orderId}/payment`, {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+            });
+            resolve();
+          } catch (err) { reject(err); }
+        },
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: { color: '#17847c' },
+        modal: { ondismiss: () => reject(new Error('cancelled')) }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    });
+
+    toast.success('Order placed successfully! 🎉');
+    await clearCart();
+    navigate('/dashboard');
+
+  } catch (err) {
+    if (err?.message === 'cancelled') {
+      toast.info('Payment cancelled.');
+    } else {
+      toast.error('Payment failed. Please try again.');
+    }
+  } finally {
+    setProcessing(false);
+  }
+};
 
   const fields = [
     { id: 'fullName', label: 'Full Name', type: 'text', testid: 'fullname-input' },

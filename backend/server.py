@@ -1,3 +1,6 @@
+import razorpay
+import hmac
+import hashlib
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
@@ -15,6 +18,7 @@ import jwt
 import base64
 from io import BytesIO
 
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -27,6 +31,11 @@ JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
 security = HTTPBearer()
+
+razorpay_client = razorpay.Client(auth=(
+    os.environ.get('RAZORPAY_KEY_ID'),
+    os.environ.get('RAZORPAY_KEY_SECRET')
+))
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -445,6 +454,7 @@ async def create_order(order_data: OrderCreate, user: User = Depends(get_current
         "shipping_address": order_data.shipping_address,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
+    
     await db.orders.insert_one(order_doc)
     await db.carts.update_one({"user_id": user.id}, {"$set": {"items": []}})
     items_text = "\n".join([f"- {item['name']} x {item['quantity']} = Rs.{item['price'] * item['quantity']}" for item in order_data.items])
@@ -455,14 +465,48 @@ async def create_order(order_data: OrderCreate, user: User = Depends(get_current
     )
     return Order(**order_doc)
 
+@api_router.post("/payments/create-order")
+async def create_razorpay_order(data: dict, user: User = Depends(get_current_user)):
+    try:
+        amount = int(float(data["amount"]) * 100)  # Paise mein
+        order = razorpay_client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "receipt": f"receipt_{uuid.uuid4().hex[:8]}"
+        })
+        return order
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/payments/verify")
+async def verify_razorpay_payment(data: dict, user: User = Depends(get_current_user)):
+    try:
+        body = f"{data['razorpay_order_id']}|{data['razorpay_payment_id']}"
+        expected_signature = hmac.new(
+            os.environ.get('RAZORPAY_KEY_SECRET').encode(),
+            body.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        if expected_signature != data['razorpay_signature']:
+            raise HTTPException(status_code=400, detail="Invalid payment signature")
+        return {"success": True, "message": "Payment verified"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/orders/{order_id}/payment")
 async def process_payment(order_id: str, payment_data: dict, user: User = Depends(get_current_user)):
     order = await db.orders.find_one({"id": order_id, "user_id": user.id})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    payment_id = f"pay_dummy_{uuid.uuid4().hex[:12]}"
-    await db.orders.update_one({"id": order_id}, {"$set": {"status": "paid", "payment_id": payment_id}})
-    return {"message": "Payment successful", "payment_id": payment_id}
+    # Ab real Razorpay payment_id save hoga
+    real_payment_id = payment_data.get("razorpay_payment_id", f"pay_dummy_{uuid.uuid4().hex[:12]}")
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"status": "paid", "payment_id": real_payment_id}}
+    )
+    return {"message": "Payment successful", "payment_id": real_payment_id}
 
 @api_router.get("/orders", response_model=List[Order])
 async def get_orders(user: User = Depends(get_current_user)):
